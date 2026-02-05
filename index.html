@@ -4,22 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Choose your cheshma</title>
+   
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
 </head>
-<body>
-    <p> Confused which cheshma suits you? </p>
-    <p> Try out our tool to find out your face shape and get help on choosing your choshma. </p>
-
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <label for="cheshmaImage">Upload your picture:</label>
-        <input type="file" id="cheshmaImage" name="cheshmaImage" accept="image/*" required>
-        <button type="submit">Submit</button>
+<body class = "bg-gray 100 flex flex-col items-center justify-center min-h-screen">
+   <div class="mb-8">
+        <p class="text-2xl font-bold text-gray-800 mb-2">
+            Confused which cheshma suits you?
+        </p>
+        <p class="text-gray-600 max-w-md mx-auto">
+            Try out our tool to find out your face shape and get help on choosing your choshma.
+        </p>
+    </div>
+    <form action="/upload" method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm mb-6">
+        <label for="cheshmaImage" class="block text-sm font-medium text-gray-700 mb-2">
+            Upload your picture:
+        </label>
+        
+        <input 
+            type="file" 
+            id="cheshmaImage" 
+            name="cheshmaImage" 
+            accept="image/*" 
+            required
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4"
+        >
+        
+        <button type="submit" class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded hover:bg-blue-700 transition">
+            Submit
+        </button>
     </form>
+<div>
+    <div>
+        <div class="flex-grow border-t border-gray-300 mr-4">
 
-    <p> Or try out the camera option to take a picture and find out your face shape. </p>
-    <button id="cameraButton">Use Camera</button>
-    <div id="cameraContainer">  
-        <video id="cameraStream" autoplay></video>
-        <button id="captureButton">Capture</button>
+        </div>
+        <span>
+            Or
+        </span>
+    </div>
+    
+</div>
+    <p class="text-gray-500 mb-4"> Try out the camera option to take a picture and find out your face shape. </p>
+    <button id="cameraButton" class="mt-2 w-full bg-green-600 text-white font-medium py-2 px-4 rounded hover:bg-green-700 transition">Use Camera</button>
+    <div id="cameraContainer" class="mt-4">  
+        <video id="cameraStream" autoplay class="w-full rounded bg-gray-900"></video>
+        <button id="captureButton" class="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition">Capture</button>
     </div>
 </body>
 </html>
