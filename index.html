@@ -59,7 +59,7 @@
                 Don't have a photo? Use your camera instantly. 
             </p>
             
-            <button id="cameraButton" class="w-full bg-emerald-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2">
+            <button id="cameraButton" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                 </svg>
@@ -109,6 +109,115 @@
 
         </div>
     </div>
+
+
+<script>
+    // 1. Select DOM elements
+    const cameraButton = document.getElementById('cameraButton');
+    const cameraContainer = document.getElementById('cameraContainer');
+    const videoElement = document.getElementById('cameraStream');
+    const captureButton = document.getElementById('captureButton');
+    
+    // We will use a hidden canvas to grab the photo frame
+    const canvas = document.createElement('canvas');
+    let stream = null;
+
+    // 2. Function to Start Camera
+    cameraButton.addEventListener('click', async () => {
+        console.log("Camera button clicked");
+        // Toggle: If camera is already open, close it
+        if (stream) {
+            stopCamera();
+            return;
+        }
+
+        try {
+            // Request Camera Permission
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            
+            // Success: Show the video feed
+            videoElement.srcObject = stream;
+            cameraContainer.classList.remove('hidden'); // Show the container
+            cameraContainer.classList.add('flex');      // Use flex for centering
+            cameraButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                Close Camera
+            `;
+            cameraButton.classList.replace('bg-emerald-500', 'bg-red-500');
+            cameraButton.classList.replace('hover:bg-emerald-600', 'hover:bg-red-600');
+
+        } catch (err) {
+            console.error("Error accessing camera: ", err);
+            alert("Could not access camera. Please allow permissions.");
+        }
+    });
+
+    // 3. Helper to Stop Camera
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop()); // Stop all tracks
+            stream = null;
+            videoElement.srcObject = null;
+            cameraContainer.classList.add('hidden');
+            
+            // Reset Button Styling
+            cameraButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                Open Camera
+            `;
+            cameraButton.classList.replace('bg-red-500', 'bg-emerald-500');
+            cameraButton.classList.replace('hover:bg-red-600', 'hover:bg-emerald-600');
+        }
+    }
+
+    // 4. Function to Capture & Check for Face (Send to Backend)
+    captureButton.addEventListener('click', () => {
+        if (!stream) return;
+
+        // A. Draw video frame to canvas
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        // B. Convert canvas to Blob (Image file)
+        canvas.toBlob((blob) => {
+            // Create a file from the blob
+            const file = new File([blob], "webcam_capture.jpg", { type: "image/jpeg" });
+
+            // C. Create form data to send to your existing /upload endpoint
+            const formData = new FormData();
+            formData.append('cheshmaImage', file);
+
+            // Visual feedback
+            captureButton.innerText = "Analyzing...";
+            captureButton.disabled = true;
+
+            // D. Send to server (AJAX)
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Assuming your server redirects or renders a result page
+                    window.location.href = response.url; 
+                } else {
+                    alert("Error processing image. Maybe no face detected?");
+                    captureButton.innerText = "Capture Photo";
+                    captureButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Server error.");
+                captureButton.innerText = "Capture Photo";
+                captureButton.disabled = false;
+            });
+        }, 'image/jpeg');
+    });
+</script>
+
 
 </body>
 
